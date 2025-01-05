@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/font-awesome.min.css">
+    
+	<!-- DataTables CSS -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+	
+	<link rel="stylesheet" th:href="@{/css/default.css}">
+</head>
+<body>
+
+    <div class="defaultHeader">
+        <header th:insert="~{layout/defaultHeader :: header}"></header>
+    </div>
+
+    <div class="sideNavBar">
+        <footer th:insert="~{layout/defaultMenu :: sideBar}"></footer>
+    </div>
+
+    <div class="content container-fluid">
+    
+        <div class="row">
+			<div class="col-12">
+				<div class="page-title-box">
+					<div class="page-title-right">
+                        <h5 class="title">List of Colors</h5>
+                    </div>
+				</div>
+			</div>
+		</div>
+    
+
+        <form action="#" method="POST" id="colorViewForm" name="colorViewForm">
+
+            <div class="card" style="width: 100%;">
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-2">
+							<!-- Button trigger modal -->
+							<a type="button" class="btn btn-outline-success" onclick="clearColorNameField();" id="modalBtn" data-bs-toggle="modal" data-bs-target="#exampleModal">
+							  Create
+							</a>
+                        </div>
+
+                    </div>
+                    
+                    <br>
+
+					<div class="table-responsive">
+						
+						<table id = "basic-datatable" class="table table-centered w-100 dt-responsive">
+						
+							<thead class="table-light">
+							
+								<tr style="font-size: 14px;">
+									
+									<th style="text-align: center;">Color ID</th>
+								    <th style="text-align: center;">Color Name</th>
+								    <th style="text-align: center;">Status</th>
+									
+								</tr>
+							
+							</thead>
+							
+							<tbody>
+									
+									<tr style="width:100%;height:25px; font-size: 11px;" th:each="colorBean : ${colorBeanList}">
+									
+										<td style="width:15%; cursor: pointer; text-align:center;" class="digienlistdetail"><span onClick="opencolorDetails(this);" th:id="${colorBean.colorId}" th:text="${colorBean.colorId}"></span></td>
+										<td style="width:15%; text-align:center;" class="digienlistdetail" th:text="${colorBean.colorName}"></td>	
+										<td style="width:20%; text-align:center;; padding: .1rem .1rem;" align="center">
+											<span class="badge bg-success" th:if="${colorBean.status == 'AUTHORIZE'}" th:text="${colorBean.action}"></span>
+											<span class="badge bg-danger" th:if="${colorBean.status == 'INITIATED'}" th:text="${colorBean.action}"></span>
+										</td>
+									
+									</tr>
+							
+							</tbody>
+							
+						</table>
+						
+						<br/>
+						<div style= "float : right; " id='tableActions'></div>    
+						
+					</div>
+
+
+                </div>
+            </div>
+			
+			<!-- Modal -->
+			<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			  <div class="modal-dialog">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">Add Color</h5>
+			        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			      </div>
+			      <div class="modal-body">
+			      	
+			      	<div class="row">
+			      		<div class="col4">
+			      			<input type="text" id="colorName" class="form-control" placeholder="Color Name"/>
+			      		</div>
+			      	</div>
+			      	
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			        <a type="button" id="modalAddBtn" onclick="addColor();" class="btn btn-outline-success">Add</a>
+			      </div>
+			    </div>
+			  </div>
+			</div>           
+            
+            <input type="hidden" id="formData" name="formData">
+            <input type="hidden" id="btnAction" name="btnAction" value="create">
+
+        </form>
+
+    </div>
+    
+</body>
+
+    <script>
+        
+        $(document).ready(function () {
+            $('#basic-datatable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                columnDefs: [
+                    { orderable: false, targets: [2] }
+                ],
+                language: {
+                    search: "",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries"
+                },
+                dom: '<"top d-flex justify-content-between"l<"d-flex"f>>rt<"bottom"ip><"clear">', // Custom DOM
+                responsive: true,                        // Make the table responsive
+                lengthMenu: [5, 10, 25, 50],             // Dropdown for page size
+            });
+            
+            var div = document.querySelector(".dataTables_length");
+            div.querySelector("select").style.width = "50%";
+            
+            var div = document.querySelector(".dataTables_filter");
+            div.querySelector("input").placeholder = "Search";
+        });
+        
+        function addColor(){
+        	
+        	var btnAction = document.getElementById("btnAction").value;
+        	
+        	if(btnAction == 'create'){
+	        	document.getElementById("formData").value = document.getElementById("colorName").value;
+	        	document.colorViewForm.action = "/colorSave";
+				document.colorViewForm.method = "POST";
+				document.colorViewForm.submit();
+        	}else if(btnAction == 'delete'){
+	        	document.colorViewForm.action = "/colorDelete";
+				document.colorViewForm.method = "POST";
+				document.colorViewForm.submit();
+        	}
+        }
+        
+        function opencolorDetails(color){
+        	var colorId = color.id;
+        	$.ajax({
+        		data: {colorId : colorId},
+        		type : "POST",
+        		url : "/getColor",
+        		success : function(data){
+        			console.log(data);
+        			console.log(data.colorName);
+        			
+        			document.getElementById("modalBtn").click();
+        			
+        			document.getElementById("colorName").value = data.colorName;
+        			
+        			document.getElementById("btnAction").value = "delete";
+        			
+        			document.getElementById("modalAddBtn").innerHTML = "Delete";
+        			document.getElementById("formData").value = colorId;
+        			document.getElementById("modalAddBtn").classList.remove("btn-outline-success");
+        			document.getElementById("modalAddBtn").classList.add("btn-outline-danger");
+        		}
+        	});
+        }
+        
+        function clearColorNameField(){
+        	document.getElementById("colorName").value = "";
+			document.getElementById("btnAction").value = "create";
+			
+			document.getElementById("modalAddBtn").innerHTML = "Add";
+			document.getElementById("formData").value = "";
+			document.getElementById("modalAddBtn").classList.remove("btn-outline-danger");
+			document.getElementById("modalAddBtn").classList.add("btn-outline-success");        	
+        }
+    </script>
+</html>

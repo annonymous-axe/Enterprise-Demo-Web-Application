@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+    <th:block th:fragment="header">
+        <nav class="navbar navbar-light  pageHeader" >
+            <div class="container-fluid">
+            <a class="navbar-brand"></a>
+            <form class="d-flex">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+                
+				<div class="btn-group">
+					<img th:src="@{images/userAvatar.png}" alt="user" class="dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="margin:2px 5px 2px 20px; width:40px; height:40px; border-radius: 50%;"  />
+				  <ul class="dropdown-menu dropdown-menu-lg-end">
+				    <li><button class="dropdown-item" type="button">Profile</button></li>
+				    <li><button class="dropdown-item" type="button">Update Password</button></li>
+				    <li><button class="dropdown-item" type="button">Logout</button></li>
+				  </ul>
+				</div>                
+
+
+            </form>
+            </div>
+        </nav>
+    </th:block>
+    
+</body>
+</html>

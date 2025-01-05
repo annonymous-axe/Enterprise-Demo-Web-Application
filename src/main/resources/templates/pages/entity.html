@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/font-awesome.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <!-- Or for RTL support -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />
+    
+    <link rel="stylesheet" th:href="@{/css/default.css}">
+</head>
+<body>
+
+    <div class="defaultHeader">
+        <header th:insert="~{layout/defaultHeader :: header}"></header>
+    </div>
+
+    <div class="sideNavBar">
+        <footer th:insert="~{layout/defaultMenu :: sideBar}"></footer>
+    </div>
+
+    <div class="content container-fluid">
+    
+        <div class="row">
+			<div class="col-12">
+				<div class="page-title-box">
+					<div class="page-title-right">
+                        <h5 class="title">Entity Info</h5>
+                        <p ><b>Entity ID : </b><span th:text="${entityID}" ></span></p>
+                    </div>
+				</div>
+			</div>
+		</div>
+    
+
+        <form id="entityForm" name="entityForm" method="post" th:object="${entity}">
+
+            <div class="card" style="width: 100%;">
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="">Entity Name</label>
+                            <input type="hidden" id="entityId" th:field="*{entityId}">
+                            <input type="text" id="entityName" th:field="*{entityName}" class="form-control"  placeholder="Entity Name" autocomplete="off" required>
+                        </div>                      
+                    </div>
+
+                </div>
+            </div>
+
+            <br/>
+            <table style="width:100%">
+                <tr style="width: 100%; height: 25px; font-size: 12px;">
+                    <td style="width:100%">
+                            <span th:if="${entity.status == null || entity.status == ''}">
+                                <button id="create" name="create" value="create" class="btn btn-outline-success rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Create</button>
+                            </span>
+                            <span th:if="${entity.status == 'INITIATED'}">
+                                <button id="approve" name="approve" value="approve" class="btn btn-outline-success rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Approve</button>
+                                <button id="decline" name="decline" value="decline" class="btn btn-outline-danger rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Decline</button>
+                            </span>
+                            <span th:if="${entity.status == 'AUTHORIZE'}">
+                                <button id="update" name="update" value="update" class="btn btn-outline-success rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Update</button>
+                                <button id="delete" name="delete" value="delete" class="btn btn-outline-danger rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Delete</button>
+                            </span>
+                            <a class="btn btn-outline-info rounded-pill" th:href="@{/entityView}" ><i class="glyph-icon icon-arrow-circle-o-left"></i>Back</a>
+                    </td>
+                </tr>
+            </table>
+            
+            <input type="hidden" id="btnAction" name="btnAction">
+            <input type="hidden" id="action" name="action" th:field="*{action}">
+
+        </form>
+
+    </div>
+    
+</body>
+
+    <script>
+        $(document).ready(function(){
+            let btnAction = null;
+            let errorString = null;
+
+            $('.btn').click(function(){
+                btnAction = $(this).val();
+            });
+
+			$("form").submit(function(){
+				
+				if(errorString!=null && errorString != ""){
+					window.alert(errorString);
+					errorString = "";
+					return false;
+				}else{
+					submitPage(btnAction);
+					return true;
+				}
+				
+			});
+            
+        });
+
+        function isNumberKey(txt, evt) {
+            
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode == 46) {
+                //Check if the text already contains the . character
+                if (txt.value.indexOf('.') === -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                if (charCode > 31
+                    && (charCode < 48 || charCode > 57))
+                    return false;
+            }
+            return true;
+        }
+
+		function submitPage(actionVal){
+			
+			document.getElementById("btnAction").value = actionVal;
+			
+			if(actionVal=="create"){
+				document.entityForm.action="/entitySave";
+				document.entityForm.submit();
+			} else if(actionVal=="approve"){
+				document.entityForm.action="/entityApprove";
+				document.entityForm.submit();
+			}else if(actionVal=="decline"){
+				document.entityForm.action="/entityDecline";
+				document.entityForm.submit();
+			} else if(actionVal=="update"){
+				document.entityForm.action="/entityUpdate";
+				document.entityForm.submit();
+			} else if(actionVal=="delete"){
+				document.entityForm.action="/entityDelete";
+				document.entityForm.submit();
+			}
+		}
+		
+		function ValidateEmail(email) {
+		    var expr = /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+		    return expr.test(email);
+		}		
+    </script>
+</html>

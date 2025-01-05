@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/font-awesome.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <!-- Or for RTL support -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />   
+    
+    <link rel="stylesheet" th:href="@{/css/default.css}">
+</head>
+<body>
+
+    <div class="defaultHeader">
+        <header th:insert="~{layout/defaultHeader :: header}"></header>
+    </div>
+
+    <div class="sideNavBar">
+        <footer th:insert="~{layout/defaultMenu :: sideBar}"></footer>
+    </div>
+
+    <div class="content container-fluid">
+    
+        <div class="row">
+			<div class="col-12">
+				<div class="page-title-box">
+					<div class="page-title-right">
+                        <h5 class="title">Client Info</h5>
+                        <p ><b>Client ID : </b><span th:text="${clientID}" ></span></p>
+                    </div>
+				</div>
+			</div>
+		</div>
+    
+
+        <form id="clientForm" name="clientForm" method="post" th:object="${client}">
+
+            <div class="card" style="width: 100%;">
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="">Entity</label>
+                            <select name="entityId" id="entityId" th:field="*{entityId}" class="form-control select2" data-toggle="select2" required>
+                                <option value="">--- Select ---</option>
+                                <option th:each="entity : ${client.entityLblValList}" th:value="${entity.value}" th:text="${entity.label}"></option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label for="">Client Name</label>
+                            <input type="hidden" id="clientId" th:field="*{clientId}">
+                            <input type="text" id="clientName" th:field="*{clientName}" class="form-control"  placeholder="Client Name" onchange="copyToTheCompanyName(this);" autocomplete="off" required>
+                        </div>                        
+                        <div class="col-4">
+                            <label for="">Company Name</label>
+                            <input type="text" id="companyName" th:field="*{companyName}" class="form-control" placeholder="Company Name" data-provide="typeahead" autocomplete="off" required>
+                        </div>
+                    </div>
+					<br/>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="">Email</label>
+                            <input type="email" id="email" th:field="*{email}" class="form-control"  placeholder="xyz@gmail.com" autocomplete="off" required>
+                        </div>
+                        <div class="col-4">
+                            <label for="">Contact No</label>
+                            <input type="text" id="contactNo" th:field="*{contactNo}" class="form-control"  placeholder="Phone No" maxlength="10" minlength="10" onkeypress="return isNumberKey(this,event);" autocomplete="off" required>
+                        </div>                        
+                        <div class="col-4">
+                            <label for="">Telephone No</label>
+                            <input type="text" id="telephoneNo" th:field="*{telephoneNo}" class="form-control" placeholder="Telephone No" autocomplete="off">
+                        </div>
+                    </div>
+					<br/>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="">Country</label>
+                            <select name="country" id="country" th:field="*{country}" class="form-control select2" data-toggle="select2" onchange="getStatesList(this);" required>
+                                <option value="">--- Select ---</option>
+                                <option th:each="countryLblVal : ${client.countryLblValList}" th:value="${countryLblVal.value}" th:text="${countryLblVal.label}"></option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label for="">State</label>
+                            <select name="state" id="state" th:field="*{state}" class="form-control select2" data-toggle="select2" onchange="getCityList(this);" required>
+                                <option value="">--- Select ---</option>
+                                <option th:each="stateLblVal : ${client.stateLblValList}" th:value="${stateLblVal.value}" th:text="${stateLblVal.label}"></option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label for="">City</label>
+                            <select name="city" id="city" th:field="*{city}" class="form-control select2" data-toggle="select2" required>
+                                <option value="">--- Select ---</option>
+                                <option th:each="cityLblVal : ${client.cityLblValList}" th:value="${cityLblVal.value}" th:text="${cityLblVal.label}"></option>
+                            </select>
+                        </div>                        
+                    </div>
+
+                </div>
+            </div>
+
+            <br/>
+            <table style="width:100%">
+                <tr style="width: 100%; height: 25px; font-size: 12px;">
+                    <td style="width:100%">
+                            <span th:if="${client.status == null || client.status == ''}">
+                                <button id="create" name="create" value="create" class="btn btn-outline-success rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Create</button>
+                            </span>
+                            <span th:if="${client.status == 'INITIATED'}">
+                                <button id="approve" name="approve" value="approve" class="btn btn-outline-success rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Approve</button>
+                                <button id="decline" name="decline" value="decline" class="btn btn-outline-danger rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Decline</button>
+                            </span>
+                            <span th:if="${client.status == 'AUTHORIZE'}">
+                                <button id="update" name="update" value="update" class="btn btn-outline-success rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Update</button>
+                                <button id="delete" name="delete" value="delete" class="btn btn-outline-danger rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Delete</button>
+                            </span>
+                            <a class="btn btn-outline-info rounded-pill" th:href="@{/clientView}" ><i class="glyph-icon icon-arrow-circle-o-left"></i>Back</a>
+                    </td>
+                </tr>
+            </table>
+            
+            <input type="hidden" id="btnAction" name="btnAction">
+            <input type="hidden" id="action" name="action" th:field="*{action}">
+            <input type="hidden" id="clientList" th:value="${clientList}" />
+
+        </form>
+
+    </div>
+    
+</body>
+
+    <script>
+        $(document).ready(function(){
+            let btnAction = null;
+            let errorString = null;
+            
+			var cateList = document.getElementById("clientList").value.split(",");
+			
+			console.log("cateList : "+cateList);
+			var itemArr = new Array();
+			for (var i = 0; i < cateList.length; i++) {
+				var value = cateList[i].replace("[", "");
+				value = value.replace("]", "");
+				console.log("pushing value :: "+value);
+				itemArr.push(value);
+			}
+			
+			var o,e=itemArr;
+			$("#clientName").typeahead(
+					{hint:!0,highlight:!0,minLength:1},
+					{name:"select",
+						source:(o=e,function(e,a){
+							var t=[];substrRegex=new RegExp(e,"i"),
+								$.each(o,function(e,a){
+									substrRegex.test(a)&&t.push(a)
+								}),a(t)
+							})
+						});
+
+            $( '#select-field' ).select2( {
+                theme: 'bootstrap-5'
+            } );
+            
+            $('.select2').select2();
+
+            $('.btn').click(function(){
+                btnAction = $(this).val();
+            });
+
+			$("form").submit(function(){
+
+				var phoneno = $("#contactNo").val();
+				
+				if(phoneno.length < 10){
+					errorString = "Please enter valid mobile number." +"\n";
+				}
+				
+				if($("#email").val() != ""){
+					if (!ValidateEmail($("#email").val())) {
+						errorString = "Please enter valid emial." +"\n";
+				     }
+				}
+				
+				if(errorString!=null && errorString != ""){
+					window.alert(errorString);
+					errorString = "";
+					return false;
+				}else{
+					submitPage(btnAction);
+					return true;
+				}
+				
+			});
+            
+        });
+
+        function isNumberKey(txt, evt) {
+            
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode == 46) {
+                //Check if the text already contains the . character
+                if (txt.value.indexOf('.') === -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                if (charCode > 31
+                    && (charCode < 48 || charCode > 57))
+                    return false;
+            }
+            return true;
+        }
+
+        function copyToTheCompanyName(client){
+
+            let clientName = client.value;
+
+            document.getElementById("companyName").value = clientName;
+
+        }
+
+		function submitPage(actionVal){
+			
+			document.getElementById("btnAction").value = actionVal;
+			
+			if(actionVal=="create"){
+				document.clientForm.action="/clientSave";
+				document.clientForm.submit();
+			} else if(actionVal=="approve"){
+				document.clientForm.action="/clientApprove";
+				document.clientForm.submit();
+			}else if(actionVal=="decline"){
+				document.clientForm.action="/clientDecline";
+				document.clientForm.submit();
+			} else if(actionVal=="update"){
+				document.clientForm.action="/clientUpdate";
+				document.clientForm.submit();
+			} else if(actionVal=="delete"){
+				document.clientForm.action="/clientDelete";
+				document.clientForm.submit();
+			}
+		}
+		
+		function ValidateEmail(email) {
+		    var expr = /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+		    return expr.test(email);
+		}
+		
+		function getStatesList(country){
+			var countryCode = country.value;
+			
+			$.ajax({
+				url : "/getStates",
+				type : "POST",
+				data : {countryCode : countryCode},
+				success : function(data){
+					
+					var stateSelectBox = document.getElementById('state');
+					stateSelectBox.innerHTML = "";
+					
+					var option = document.createElement("option");
+					option.value = "";
+					option.text = "--- Select ---";
+					stateSelectBox.appendChild(option);
+					for(var i=0; i<data.length; i++){
+						var option = document.createElement("option");
+						option.value = data[i].value;
+						option.text = data[i].label;
+						stateSelectBox.appendChild(option);
+						
+					}
+				}
+			});
+		}
+		
+		function getCityList(state){
+			var stateCode = state.value;
+			
+			$.ajax({
+				url : "/getCities",
+				type : "POST",
+				data : {stateCode : stateCode},
+				success : function(data){
+					
+					var stateSelectBox = document.getElementById('city');
+					stateSelectBox.innerHTML = "";
+					
+					var option = document.createElement("option");
+					option.value = "";
+					option.text = "--- Select ---";
+					stateSelectBox.appendChild(option);
+					for(var i=0; i<data.length; i++){
+						var option = document.createElement("option");
+						option.value = data[i].label;
+						option.text = data[i].label;
+						stateSelectBox.appendChild(option);
+						
+					}
+				}
+			});
+		}		
+    </script>
+</html>

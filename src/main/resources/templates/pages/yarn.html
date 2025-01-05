@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/font-awesome.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <!-- Or for RTL support -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.rtl.min.css" />   
+    
+    <link rel="stylesheet" th:href="@{/css/default.css}">
+</head>
+<body style="overflow-y: auto;">
+
+    <div class="defaultHeader">
+        <header th:insert="~{layout/defaultHeader :: header}"></header>
+    </div>
+
+    <div class="sideNavBar">
+        <footer th:insert="~{layout/defaultMenu :: sideBar}"></footer>
+    </div>
+
+    <div class="content container-fluid" style="height: 150vh;">
+    
+        <div class="row">
+			<div class="col-12">
+				<div class="page-title-box">
+					<div class="page-title-right">
+                        <h5 class="title">Yarn Info</h5>
+                        <p ><b>Yarn ID : </b><span th:text="${yarnID}" ></span></p>
+                    </div>
+				</div>
+			</div>
+		</div>
+
+        <form id="yarnForm" name="yarnForm" method="post" th:object="${yarn}">
+
+            <div class="card" style="width: 100%;">
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="">Entity</label>
+                            <select name="entityId" id="entityId" th:field="*{entityId}" class="form-control select2" data-toggle="select2" required>
+                                <option value="">--- Select ---</option>
+                                <option th:each="entity : ${yarn.entityLblValList}" th:value="${entity.value}" th:text="${entity.label}"></option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label for="">Yarn Name</label>
+                            <input type="hidden" id="yarnId" th:field="*{yarnId}">
+                            <input type="text" id="yarnName" th:field="*{yarnName}" class="form-control"  placeholder="Yarn Name" autocomplete="off" required>
+                        </div>                        
+                        <div class="col-4">
+                            <label for="">Type</label>
+                            <select name="type" id="type" th:field="*{type}" class="form-control select2" data-toggle="select2" required>
+                                <option value="">--- Select ---</option>
+                                <option th:each="yarnType : ${yarn.yarnTypeLblValList}" th:value="${yarnType.value}" th:text="${yarnType.label}"></option>
+                            </select>
+                        </div>
+                    </div>
+					<br/>
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="">Denier</label>
+                            <input type="text" id="denier" th:field="*{denier}" class="form-control"  placeholder="Denier" autocomplete="off" onkeypress="return isNumberKey(this,event);" required>
+                        </div>
+                        <div class="col-4">
+                            <label for="">Remarks</label>
+                            <textarea id="remarks" th:field="*{remarks}" class="form-control"  placeholder="Remarks" autocomplete="off">
+                            </textarea>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+			<br>            
+			<div id="page-title">
+			    <h5>Yarn Color Rate List&nbsp;&nbsp;</h5>
+			</div>
+				
+			<div class="card"> 
+				<div class="card-body">	
+					<div  style="max-height: 150px; overflow-y: auto;">
+						<table id="taskTable" class="table table-striped table-bordered responsive no-wrap">
+							<thead class="table-light">
+								<tr style="font-size: 14px;">
+									  <th style="text-align: center;">Sr No.</th>
+							    	  <th style="text-align: center; position: sticky; top: 0; z-index: 1;">Color</th>
+				                      <th style="text-align: center; position: sticky; top: 0; z-index: 1;">Rate</th>
+							  	</tr>
+							</thead>
+
+							<tbody id="taskListContainer">
+								<tr th:each="itemDetailBean, status : *{itemDetailBeanList}">
+									<td th:text="${status.count}">
+										
+									</td>
+                                	<td>
+                                    	<input type="hidden" id="colorId" th:field="*{itemDetailBeanList[__${status.index}__].colorId}">
+                                        <input type="text" id="colorName" th:field="*{itemDetailBeanList[__${status.index}__].colorName}" class="form-control"  placeholder="Color Name" autocomplete="off" readonly>
+                                    </td>
+                                	<td>
+                                        <input type="text" id="rate" th:field="*{itemDetailBeanList[__${status.index}__].rate}" class="form-control"  placeholder="Rate" onkeypress="return isNumberKey(this,event);" autocomplete="off" required>
+                                    </td>                                    
+                                </tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div> 
+            <br/>
+            <table style="width:100%">
+                <tr style="width: 100%; height: 25px; font-size: 12px;">
+                    <td style="width:100%">
+                            <span th:if="${yarn.status == null || yarn.status == ''}">
+                                <button id="create" name="create" value="create" class="btn btn-outline-success rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Create</button>
+                            </span>
+                            <span th:if="${yarn.status == 'INITIATED'}">
+                                <button id="approve" name="approve" value="approve" class="btn btn-outline-success rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Approve</button>
+                                <button id="decline" name="decline" value="decline" class="btn btn-outline-danger rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Decline</button>
+                            </span>
+                            <span th:if="${yarn.status == 'AUTHORIZE'}">
+                                <button id="update" name="update" value="update" class="btn btn-outline-success rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Update</button>
+                                <button id="delete" name="delete" value="delete" class="btn btn-outline-danger rounded-pill"><i class="glyph-icon icon-check-circle-o"></i>Delete</button>
+                            </span>
+                            <a class="btn btn-outline-info rounded-pill" th:href="@{/yarnView}" ><i class="glyph-icon icon-arrow-circle-o-left"></i>Back</a>
+                    </td>
+                </tr>
+            </table>
+            
+            <input type="hidden" id="btnAction" name="btnAction">
+            <input type="hidden" id="action" name="action" th:field="*{action}">
+<!--             <input type="hidden" id="yarnList" th:value="${yarnList}" /> -->
+
+        </form>
+
+    </div>
+    
+</body>
+
+    <script>
+        $(document).ready(function(){
+            let btnAction = null;
+            let errorString = null;
+            
+// 			var cateList = document.getElementById("yarnList").value.split(",");
+			
+// 			console.log("cateList : "+cateList);
+// 			var itemArr = new Array();
+// 			for (var i = 0; i < cateList.length; i++) {
+// 				var value = cateList[i].replace("[", "");
+// 				value = value.replace("]", "");
+// 				console.log("pushing value :: "+value);
+// 				itemArr.push(value);
+// 			}
+			
+// 			var o,e=itemArr;
+// 			$("#yarnName").typeahead(
+// 					{hint:!0,highlight:!0,minLength:1},
+// 					{name:"select",
+// 						source:(o=e,function(e,a){
+// 							var t=[];substrRegex=new RegExp(e,"i"),
+// 								$.each(o,function(e,a){
+// 									substrRegex.test(a)&&t.push(a)
+// 								}),a(t)
+// 							})
+// 						});
+
+            $( '#select-field' ).select2( {
+                theme: 'bootstrap-5'
+            } );
+            
+            $('.select2').select2();
+
+            $('.btn').click(function(){
+                btnAction = $(this).val();
+            });
+
+			$("form").submit(function(){
+				
+				if(errorString!=null && errorString != ""){
+					window.alert(errorString);
+					errorString = "";
+					return false;
+				}else{
+					submitPage(btnAction);
+					return true;
+				}
+				
+			});
+            
+        });
+
+        function isNumberKey(txt, evt) {
+            
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode == 46) {
+                //Check if the text already contains the . character
+                if (txt.value.indexOf('.') === -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                if (charCode > 31
+                    && (charCode < 48 || charCode > 57))
+                    return false;
+            }
+            return true;
+        }
+
+		function submitPage(actionVal){
+			
+			document.getElementById("btnAction").value = actionVal;
+			
+			if(actionVal=="create"){
+				document.yarnForm.action="/yarnSave";
+				document.yarnForm.submit();
+			} else if(actionVal=="approve"){
+				document.yarnForm.action="/yarnApprove";
+				document.yarnForm.submit();
+			}else if(actionVal=="decline"){
+				document.yarnForm.action="/yarnDecline";
+				document.yarnForm.submit();
+			} else if(actionVal=="update"){
+				document.yarnForm.action="/yarnUpdate";
+				document.yarnForm.submit();
+			} else if(actionVal=="delete"){
+				document.yarnForm.action="/yarnDelete";
+				document.yarnForm.submit();
+			}
+		}		
+    </script>
+</html>
